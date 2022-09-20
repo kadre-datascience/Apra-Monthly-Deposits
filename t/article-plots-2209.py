@@ -168,4 +168,5 @@ plot_data = get_plot_data(fullresult)
 fig_growth = growth_plot()
 fig_cashrate = cashrate_plot()
 
-
+fig_growth.write_html('../t/fig-growth-2209.html')
+fig_cashrate.write_html('../t/fig-cash-rate-2209.html')
