@@ -134,27 +134,6 @@ def growth_plot():
     fig.update_traces(mode='lines+markers')
     fig.add_annotation(x='2022-08-01', y=2.81,
                 text="+281%",
-                showarrow=False,def growth_plot():
-    fig = px.line(plot_data,y='percentage_growth',x=plot_data.Date.astype(str),color='Institution_Name',template='plotly_white',
-    labels={"percentage_growth":"Growth"}, title="Housing loan growth since Mar'20",render_mode='svg',
-    color_discrete_map={
-                    "Big 4": "brown",
-                    "International retail bank": "#565656",
-                    "Tier 2 bank (1)": "#316395",
-                    "Tier 2 bank (2)": "rgb(15,133,84)",
-                    "Other bank": "rgb(111,64,112)"},)
-    fig.update_layout(legend=dict(
-        orientation="h",
-        title="",
-#        yanchor="bottom",
-#        y=1.2,
-#        xanchor="left",
- #       x=0.4)
-        ))
-    fig.update_xaxes(title= "")
-    fig.update_traces(mode='lines+markers')
-    fig.add_annotation(x='2022-08-01', y=2.81,
-                text="+281%",
                 showarrow=False,
                 arrowhead=1)
     fig.add_annotation(x='2022-08-01', y=0.35,
@@ -182,8 +161,11 @@ def cashrate_plot():
     fig.show()
     return fig
 
+
 fullresult = get_full_result()
 cashrate = get_cash_rate()
 plot_data = get_plot_data(fullresult)
 fig_growth = growth_plot()
 fig_cashrate = cashrate_plot()
+
+
