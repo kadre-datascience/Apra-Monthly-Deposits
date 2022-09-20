@@ -1,11 +1,12 @@
 import pandas as pd
 import numpy as np 
-pd.set_option('display.max_rows', 500)
+import plotly_express as px
 import plotly.graph_objects as go
+pd.set_option('display.max_rows', 500)
 
 
 def get_full_result():
-    xls = pd.ExcelFile('Data/Monthly authorised deposit-taking institution statistics back-series March 2019 - July 2022.xlsx')
+    xls = pd.ExcelFile('../Data/Monthly authorised deposit-taking institution statistics back-series March 2019 - July 2022.xlsx')
     df = pd.read_excel(xls, sheet_name='Table 1', header=1)
     df.columns = df.columns.str.replace(' ','_')
     list_of_names=df.Institution_Name.unique()
@@ -23,7 +24,7 @@ def get_full_result():
     df['Deposit/Asset'] = df['Total_residents_deposits']/ df['Total_residents_assets']
     df['Total_Housing_Loans'] =  df['Loans_to_households:_Housing:_Owner-occupied'] +  df['Loans_to_households:_Housing:_Investment'] 
     df_filt = df[['Period', 'Institution_Name','Deposits_by_households','Total_residents_loans_and_finance_leases','Total_residents_deposits','Total_Housing_Loans','Loans_to_households:_Credit_cards','Loans_to_households:_Other' ,'DLR', 'Deposit/Asset']]
-    xls = pd.ExcelFile('Data/APRA Reporting Institute Names by Sector.xlsx')
+    xls = pd.ExcelFile('../Data/APRA Reporting Institute Names by Sector.xlsx')
     categories = pd.read_excel(xls, sheet_name='Sheet1')
     categories.columns
     categoriesReal = categories.iloc[:,1:4]
@@ -52,7 +53,7 @@ def get_full_result():
 
 
 def get_cash_rate():
-    cashrate = pd.read_csv("./Data/rba-cashrate.csv")
+    cashrate = pd.read_csv("../Data/rba-cashrate.csv")
     cashrate.rename(columns={'Cash Rate Target':'cash-rate'},inplace=True)
     cashrate['Date'] = pd.to_datetime(cashrate['Date'])
     cashrate = cashrate[cashrate['Date']>'2020-01-31']
@@ -111,54 +112,78 @@ def get_plot_data(fullresult):
     
     return sample
 
-fullresult = get_full_result()
-cashrate = get_cash_rate()
-plot_data = get_plot_data(fullresult)
 
 def growth_plot():
     fig = px.line(plot_data,y='percentage_growth',x=plot_data.Date.astype(str),color='Institution_Name',template='plotly_white',
-    labels={"percentage_growth":"Growth"}, title="Housing loan growth since Mar'20",
+    labels={"percentage_growth":"Growth"}, title="Housing loan growth since Mar'20",render_mode='svg',
     color_discrete_map={
-                    "Big 4": "red",
-                    "International retail bank": "goldenrod",
-                    "Tier 2 bank (1)": "blue",
-                    "Tier 2 bank (2)": "green",
-                    "Other bank": "brown"},)
+                    "Big 4": "brown",
+                    "International retail bank": "#565656",
+                    "Tier 2 bank (1)": "#316395",
+                    "Tier 2 bank (2)": "rgb(15,133,84)",
+                    "Other bank": "rgb(111,64,112)"},)
     fig.update_layout(legend=dict(
         orientation="h",
         title="",
-        yanchor="top",
-        y=1.2,
-        xanchor="left",
-        x=0.4))
+#        yanchor="bottom",
+#        y=1.2,
+#        xanchor="left",
+ #       x=0.4)
+        ))
     fig.update_xaxes(title= "")
     fig.update_traces(mode='lines+markers')
-    '''
-    fig.add_annotation(x=9.25, y=2.81,
+    fig.add_annotation(x='2022-08-01', y=2.81,
+                text="+281%",
+                showarrow=False,def growth_plot():
+    fig = px.line(plot_data,y='percentage_growth',x=plot_data.Date.astype(str),color='Institution_Name',template='plotly_white',
+    labels={"percentage_growth":"Growth"}, title="Housing loan growth since Mar'20",render_mode='svg',
+    color_discrete_map={
+                    "Big 4": "brown",
+                    "International retail bank": "#565656",
+                    "Tier 2 bank (1)": "#316395",
+                    "Tier 2 bank (2)": "rgb(15,133,84)",
+                    "Other bank": "rgb(111,64,112)"},)
+    fig.update_layout(legend=dict(
+        orientation="h",
+        title="",
+#        yanchor="bottom",
+#        y=1.2,
+#        xanchor="left",
+ #       x=0.4)
+        ))
+    fig.update_xaxes(title= "")
+    fig.update_traces(mode='lines+markers')
+    fig.add_annotation(x='2022-08-01', y=2.81,
                 text="+281%",
                 showarrow=False,
                 arrowhead=1)
-    fig.add_annotation(x=9.2, y=0.97,
+    fig.add_annotation(x='2022-08-01', y=0.35,
+                text="+31%",
+                showarrow=False,
+                arrowhead=1)
+    fig.add_annotation(x='2022-08-01', y=0.97,
                 text="+97%",
                 showarrow=False,
                 arrowhead=1)
-    fig.add_annotation(x=9.4, y=0.11,
+    fig.add_annotation(x='2022-08-15', y=0.11,
                 text="Big4 +11%",
                 showarrow=False,
                 arrowhead=2)
-    '''
-    fig.show()
+    fig.show()  
     return fig
-
-fig_growth = growth_plot()
 
 
 def cashrate_plot():
-    fig = px.line(cashrate,y='cash-rate',x=cashrate.Date.astype(str),template='plotly_white',color_discrete_sequence=['black'],title="Cash rate movement since Jan'20")
-    fig.update_traces(mode='lines+markers+text')
-    fig.update_yaxes(title= "Cash rate (%)")
+    fig = px.line(cashrate,y='cash-rate',x=cashrate.Date.astype(str),template='plotly_white',color_discrete_sequence=['black'],text=[f'{y}%' for y in cashrate['cash-rate']],title="Cash rate movement since Jan'20")
+    fig.update_traces(textposition="top center",)
+    fig.update_traces(mode='lines+markers+text',line=dict(dash='dash'))
+    fig.update_yaxes(title= "Cash rate")
     fig.update_xaxes(title= "")
     fig.show()
     return fig
 
+fullresult = get_full_result()
+cashrate = get_cash_rate()
+plot_data = get_plot_data(fullresult)
+fig_growth = growth_plot()
 fig_cashrate = cashrate_plot()
