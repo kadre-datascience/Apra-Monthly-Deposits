@@ -114,7 +114,7 @@ def get_plot_data(fullresult):
 
 
 def growth_plot():
-    fig = px.line(plot_data,y='percentage_growth',x=plot_data.Date.astype(str),color='Institution_Name',template='plotly_white',
+    fig = px.line(plot_data,height=600,width=1200,y='percentage_growth',x=plot_data.Date.astype(str),color='Institution_Name',template='plotly_white',
     labels={"percentage_growth":"Growth"}, title="Housing loan growth since Mar'20",render_mode='svg',
     color_discrete_map={
                     "Big 4": "brown",
@@ -153,7 +153,7 @@ def growth_plot():
 
 
 def cashrate_plot():
-    fig = px.line(cashrate,y='cash-rate',x=cashrate.Date.astype(str),template='plotly_white',color_discrete_sequence=['black'],text=[f'{y}%' for y in cashrate['cash-rate']],title="Cash rate movement since Jan'20")
+    fig = px.line(cashrate,height=600,width=1200,y='cash-rate',x=cashrate.Date.astype(str),template='plotly_white',color_discrete_sequence=['black'],text=[f'{y}%' for y in cashrate['cash-rate']],title="Cash rate movement since Jan'20")
     fig.update_traces(textposition="top center",)
     fig.update_traces(mode='lines+markers+text',line=dict(dash='dash'))
     fig.update_yaxes(title= "Cash rate")
@@ -168,5 +168,5 @@ plot_data = get_plot_data(fullresult)
 fig_growth = growth_plot()
 fig_cashrate = cashrate_plot()
 
-fig_growth.write_html('../t/fig-growth-2209.html')
-fig_cashrate.write_html('../t/fig-cash-rate-2209.html')
+fig_growth.write_html('../t/fig-growth-2209_600x1200.html')
+fig_cashrate.write_html('../t/fig-cash-rate-2209_600x1200.html')
