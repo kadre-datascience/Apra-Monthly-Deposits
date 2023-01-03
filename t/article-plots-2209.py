@@ -132,22 +132,22 @@ def growth_plot():
         ))
     fig.update_xaxes(title= "")
     fig.update_traces(mode='lines+markers')
-    fig.add_annotation(x='2022-08-01', y=2.81,
-                text="+281%",
-                showarrow=False,
-                arrowhead=1)
-    fig.add_annotation(x='2022-08-01', y=0.35,
-                text="+31%",
-                showarrow=False,
-                arrowhead=1)
-    fig.add_annotation(x='2022-08-01', y=0.97,
-                text="+97%",
-                showarrow=False,
-                arrowhead=1)
-    fig.add_annotation(x='2022-08-15', y=0.11,
-                text="Big4 +11%",
-                showarrow=False,
-                arrowhead=2)
+    # fig.add_annotation(x='2022-08-01', y=2.81,
+    #             text="+281%",
+    #             showarrow=False,
+    #             arrowhead=1)
+    # fig.add_annotation(x='2022-08-01', y=0.35,
+    #             text="+31%",
+    #             showarrow=False,
+    #             arrowhead=1)
+    # fig.add_annotation(x='2022-08-01', y=0.97,
+    #             text="+97%",
+    #             showarrow=False,
+    #             arrowhead=1)
+    # fig.add_annotation(x='2022-08-15', y=0.11,
+    #             text="Big4 +11%",
+    #             showarrow=False,
+    #             arrowhead=2)
     fig.show()  
     return fig
 
