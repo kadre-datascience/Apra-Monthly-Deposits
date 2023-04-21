@@ -11,32 +11,28 @@ prepare_backseries <- function() {
         sheet="ColNames")
     categories <- readxl::read_excel(
         path=here('Data', 'APRA Reporting Institute Names by Sector.xlsx'))
-    # backseries 
     url <- here("Data", "back_series.xlsx")
     data.backseries <- readxl::read_excel(url, sheet="Table 1", 
                        col_names=colnames$New, 
                        skip=1) %>% 
+        select(subset(colnames, Keep==TRUE)$New) %>% 
         rename("Institution"="Institution Name") %>% 
-        select(-starts_with("Drop")) %>% 
-        mutate(
-            `Total deposits` = `Intra-group deposits` + `Total residents deposits` + `Cash and deposits with financial institutions`, 
-            `Total borrowings` = `Total short-term borrowings` + `Total long-term borrowings` + `Negotiable Certificates of Deposit`, 
-            `Total funding` = `Total deposits` + `Total borrowings`,
-            `Total loans` = `Total residents loans and finance leases` + 
-                `Intra-group loans and finance leases`, 
-            `Total housing loans` = `Loans to households: Housing: Owner-occupied` + 
-                `Loans to households: Housing: Investment`) %>% 
-        pivot_longer(cols=-c("Period", "ABN", "Institution"), 
+        mutate(`Total housing loans` = `Loans to households: Housing: Owner-occupied` + `Loans to households: Housing: Investment`) %>% 
+        pivot_longer(cols=-c("Period", "Institution"), 
                      names_to="Measure", 
                      values_to="ValueMillion") %>% 
         inner_join(categories %>% select(Institute_Name, Sector, Sector2), 
                    by=c("Institution"="Institute_Name")) %>% 
-        mutate(Period = tsibble::yearmonth(Period), 
-               ABN = format(ABN, big.mark = " ")) 
+        mutate(Period = tsibble::yearmonth(Period)) 
     return(data.backseries) } 
 
 download_banking_stats <- function() {  
-    categories <- readxl::read_excel('Data/APRA Reporting Institute Names by Sector.xlsx')
+    categories <- readxl::read_excel(
+        path='Data/APRA Reporting Institute Names by Sector.xlsx', 
+        sheet="Sheet1") 
+    colnames <- readxl::read_excel(
+        path=here('Data', 'APRA Reporting Institute Names by Sector.xlsx'), 
+        sheet="ColNames")
     url <- "https://www.apra.gov.au/monthly-authorised-deposit-taking-institution-statistics"
     site <- read_html(url) 
     path <- site %>% html_elements(".document-link") %>% html_attr("href")  
@@ -44,22 +40,15 @@ download_banking_stats <- function() {
     readxl::read_excel(path=here("Data", "temp.xlsx"), 
                        sheet = "Table 1", 
                        skip=1) %>% 
+        select(subset(keepcolumns, Keep==TRUE)$New) %>% 
         rename("Institution"="Institution Name") %>% 
-        mutate(
-            `Total deposits` = `Intra-group deposits` + `Total residents deposits` + `Cash and deposits with financial institutions`, 
-            `Total borrowings` = `Total short-term borrowings` + `Total long-term borrowings` + `Negotiable Certificates of Deposit`, 
-            `Total funding` = `Total deposits` + `Total borrowings`,
-            `Total loans` = `Total residents loans and finance leases` + 
-                `Intra-group loans and finance leases`, 
-            `Total housing loans` = `Loans to households: Housing: Owner-occupied` + 
-                `Loans to households: Housing: Investment`) %>% 
-        pivot_longer(cols=-c("Period", "ABN", "Institution"), 
+        mutate(`Total housing loans` = `Loans to households: Housing: Owner-occupied` + `Loans to households: Housing: Investment`) %>% 
+        pivot_longer(cols=-c("Period", "Institution"), 
                      names_to="Measure", 
                      values_to="ValueMillion") %>% 
         inner_join(categories %>% select(Institute_Name, Sector, Sector2), 
                   by=c("Institution"="Institute_Name")) %>% 
-        mutate(Period = tsibble::yearmonth(Period), 
-               ABN = format(ABN, big.mark = " "))  } 
+        mutate(Period = tsibble::yearmonth(Period))  } 
 
 summarise_top_banks <- function(data, topn=6, topby="Total residents assets") { 
     sector_top_banks <- data %>% 
@@ -130,13 +119,11 @@ ggplot_sector_trends <- function(data, measure=NULL) {
 
 # Regular Run ----- 
 
-update_bankstats <- function(summary=TRUE) {   
+update_bankstats <- function() {   
     data <- download_banking_stats() 
     data.backseries <-  read_rds(here("Data", "bank_stats_backseries.rds")) %>% 
         filter(!(Period %in% data$Period)) 
     data <- bind_rows(data, data.backseries) 
-    if (summary==TRUE) { 
-        data <- summarise_top_banks(data) }
     write_rds(data, here("Data", "banking_stats.rds"))
     write_json(data %>% mutate(Period=as.Date(Period)), 
         here("docs", "banking_stats.json"), 
