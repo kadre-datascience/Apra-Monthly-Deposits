@@ -124,20 +124,23 @@ ggplot_sector_trends <- function(data, measure=NULL) {
 }
 
 # ----- Run -----
-data.backseries <- prepare_backseries()
-write_rds(data.backseries, here("Data", "bank_stats_backseries.rds"))
+# data.backseries <- prepare_backseries()
+# write_rds(data.backseries, here("Data", "bank_stats_backseries.rds"))
+
 
 # Regular Run ----- 
-data <- download_banking_stats() 
-data.backseries <-  read_rds(here("Data", "bank_stats_backseries.rds")) %>% 
-    filter(!(Period %in% data$Period)) 
-data.summ <- bind_rows(data, data.backseries) %>% 
-    summarise_top_banks() 
 
-#save out ... 
-write_rds(data.summ, here("Data", "banking_stats.rds"))
-write_json(data.summ %>% mutate(Period=as.Date(Period)), 
-     here("app", "banking_stats.json"), 
-     auto_unbox = TRUE)
+update_bankstats <- function(summary=TRUE) {   
+    data <- download_banking_stats() 
+    data.backseries <-  read_rds(here("Data", "bank_stats_backseries.rds")) %>% 
+        filter(!(Period %in% data$Period)) 
+    data <- bind_rows(data, data.backseries) 
+    if (summary==TRUE) { 
+        data <- summarise_top_banks(data) }
+    write_rds(data, here("Data", "banking_stats.rds"))
+    write_json(data %>% mutate(Period=as.Date(Period)), 
+        here("docs", "banking_stats.json"), 
+        auto_unbox = TRUE)
+    return(data) } 
 
 

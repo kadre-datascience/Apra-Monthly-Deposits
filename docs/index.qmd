@@ -15,37 +15,46 @@ execute:
 ---
 
 ```{ojs}
+import {Plot} from "@mkfreeman/plot-tooltip";
+import {addTooltips} from "@mkfreeman/plot-tooltip";
+```
+
+
+```{ojs}
 data = FileAttachment("banking_stats.json").json()
 measures = data.map(d => d.Measure).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}); 
 sectors = data.map(d => d.Sector).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}); 
 ```
 
+
 ```{ojs}
 viewof measure = Inputs.select(measures, 
-  {value: "Total residents assets", label: "Financial Measures", width: 300})
-viewof sector = Inputs.select(sectors, 
-  {value: "BIG 4", label: "Banking Sectors", width: 300})
+  {value: "Total residents assets", label: "Financial Measures", width: 300, multiple: false})
 ```
 
 ```{ojs}
-data_filter = data.filter(x => x.Measure==measure).filter(x => x.Sector==sector)
-Plot.plot({
- color: { legend: true },
-  y: {
-    grid: true,
-    type: "log",
-    label: "Value: $million"
-  },
-  x: { type: "utc" }, 
-  marks: [
-    Plot.ruleY([0]),
-    Plot.line(data_filter, 
-              {x: "Period", y: "ValueMillion", stroke: "InstitutionSumm" })
-  ]
-})
+viewof sector = Inputs.select(sectors, 
+  {value: "BIG 4", label: "Banking Sectors", width: 300, multiple: true})
 ```
 
-Source: [APRA Banking Statistics](https://www.apra.gov.au/monthly-authorised-deposit-taking-institution-statistics)
+&nbsp;  
 
-
-
+```{ojs}
+data_filter = data.filter(x => x.Measure==measure).filter(x => sector.includes(x.Sector)); 
+addTooltips(
+  Plot.plot({
+    height: 800,
+    color: { legend: true },
+    y: { grid: false, type: "log", label: "Value: $million"},
+    x: { type: "utc" }, 
+    marks: [
+      Plot.axisX({anchor: "top", label: "Frequency (%) →"}),
+      Plot.ruleY([0]),
+      Plot.line(data_filter, 
+        { x: "Period", y: "ValueMillion", stroke: "Sector", 
+          z: "InstitutionSumm", title: "InstitutionSumm", opacity: 0.5 })
+      ]
+  }), 
+  { stroke: "black" }
+)
+```
