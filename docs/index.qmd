@@ -14,20 +14,23 @@ execute:
     echo: false
 ---
 
+Data source: [APRA Banking Statistics](https://www.apra.gov.au/monthly-authorised-deposit-taking-institution-statistics)
+
 ```{ojs}
 import {Plot} from "@mkfreeman/plot-tooltip";
 import {addTooltips} from "@mkfreeman/plot-tooltip";
 ```
 
-
 ```{ojs}
-data = FileAttachment("banking_stats.json").json()
-measures = data.map(d => d.Measure).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}); 
-sectors = data.map(d => d.Sector).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}); 
+data = FileAttachment("banking_stats.csv").csv()
+measures = data.map(d => d.Measure).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).sort(); 
+sectors = data.map(d => d.Sector).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).sort(); 
 ```
 
 
 ## Sector Trends
+
+Select the balance sheet time to chart (you can select 1 only), select the sectors or group of authorised deposit taking institution types you are interested in (you can select many). 
 
 ```{ojs}
 viewof measure = Inputs.select(measures, 

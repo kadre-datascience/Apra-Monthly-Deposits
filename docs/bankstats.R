@@ -40,7 +40,7 @@ download_banking_stats <- function() {
     readxl::read_excel(path=here("Data", "temp.xlsx"), 
                        sheet = "Table 1", 
                        skip=1) %>% 
-        select(subset(keepcolumns, Keep==TRUE)$New) %>% 
+        select(subset(colnames, Keep==TRUE)$New) %>% 
         rename("Institution"="Institution Name") %>% 
         mutate(`Total housing loans` = `Loans to households: Housing: Owner-occupied` + `Loans to households: Housing: Investment`) %>% 
         pivot_longer(cols=-c("Period", "Institution"), 
