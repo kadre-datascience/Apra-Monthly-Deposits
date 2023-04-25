@@ -27,6 +27,8 @@ sectors = data.map(d => d.Sector).filter(function (e, i, x) {return x.indexOf(e,
 ```
 
 
+## Sector Trends
+
 ```{ojs}
 viewof measure = Inputs.select(measures, 
   {value: "Total residents assets", label: "Financial Measures", width: 300, multiple: false})
@@ -48,13 +50,67 @@ addTooltips(
     y: { grid: false, type: "log", label: "Value: $million"},
     x: { type: "utc" }, 
     marks: [
-      Plot.axisX({anchor: "top", label: "Frequency (%) →"}),
-      Plot.ruleY([0]),
+      Plot.axisX({anchor: "top"}),
       Plot.line(data_filter, 
         { x: "Period", y: "ValueMillion", stroke: "Sector", 
-          z: "InstitutionSumm", title: "InstitutionSumm", opacity: 0.5 })
+          z: "Institution", title: "Institution", opacity: 0.5 })
       ]
   }), 
   { stroke: "black" }
 )
 ```
+
+## Institution Balance Sheet
+
+```{ojs}
+institutions = data_filter.map(d => d.Institution).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).sort(); 
+```
+
+```{ojs}
+viewof institution = Inputs.select(institutions, 
+  {value: "Australia and New Zealand Banking Group Limited", label: "Institutions", width: 300, multiple: false})
+```
+
+```{ojs}
+lastdate = d3.max(data.map(d => d.Period));
+mthformat = d3.timeFormat("%Y-%m");
+viewof monthPicked = Inputs.text({
+  type: "month",
+  label: "Table Date",
+  value: mthformat(new Date(lastdate)),
+  min: "2002-06", 
+  max: mthformat(new Date(lastdate))
+})
+datePicked = monthPicked + "-01";
+```
+
+```{ojs}
+mthformatlong = d3.timeFormat("%B %Y");
+```
+
+### Loans
+
+```{ojs}
+md`**Loans** by ${institution} for the month ending ${mthformatlong(new Date(datePicked))}`
+```
+
+```{ojs}
+Inputs.table(
+  data.filter(d => d.Period===datePicked).filter(d => d.Institution===institution).filter(d => d.Measure.match("^Loans to")!=null), 
+  {   columns: [ "Measure", "ValueMillion"] });
+```
+
+### Deposits
+
+```{ojs}
+md`**Deposits** with the ${institution} for the month ending ${mthformatlong(new Date(datePicked))}`
+```
+
+```{ojs}
+Inputs.table(
+  data.filter(d => d.Period===datePicked).filter(d => d.Institution===institution).filter(d => d.Measure.match("^Deposits by")!=null), 
+  {   columns: [ "Measure", "ValueMillion"] });
+```
+
+
+
