@@ -2,7 +2,10 @@ name: Update APRA Banking Stats
 on: 
   schedule:
     - cron:  '1 1 1 * *'
-
+  push:
+    branches:
+      - main
+  
 jobs: 
   read-update:
     # The type of runner that the job will run on
@@ -38,4 +41,4 @@ jobs:
       - name: move 
         run: |
           mkdir docs
-          cp -r _site/* docs
+          cp -r Docs/_site/* docs
