@@ -12,6 +12,7 @@ format:
         include-after-body: www/footer.html
 execute: 
     echo: false
+output-dir: _docs
 ---
 
 Data source: [APRA Banking Statistics](https://www.apra.gov.au/monthly-authorised-deposit-taking-institution-statistics)
@@ -22,7 +23,7 @@ import {addTooltips} from "@mkfreeman/plot-tooltip";
 ```
 
 ```{ojs}
-data = FileAttachment("banking_stats.csv").csv()
+data = FileAttachment("../Data/banking_stats.csv").csv()
 measures = data.map(d => d.Measure).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).sort(); 
 sectors = data.map(d => d.Sector).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).sort(); 
 ```
