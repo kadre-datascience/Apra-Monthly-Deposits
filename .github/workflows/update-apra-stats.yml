@@ -13,8 +13,9 @@ jobs:
     steps:
     # Run R script
     - name: Scrape
-      run: Rscript Docs/bankstats.R   
-    
+      run: |
+        Rscript Docs/bankstats.R   
+
     - name: Commit files
       run: |
         git config --local user.name actions-user
@@ -25,14 +26,16 @@ jobs:
       env:
         REPO_KEY: ${{secrets.GITHUB_TOKEN}}
         username: github-actions
-        
+
   publish: 
     runs-on: ubuntu-latest
     container: klettsch/rquarto
     steps:
-        name: publish1
-        run: quarto render Docs
-        name: move 
+      - name: publish1
         run: |
-            mkdir docs
-            cp -r _site/* docs
+          quarto render Docs
+
+      - name: move 
+        run: |
+          mkdir docs
+          cp -r _site/* docs
