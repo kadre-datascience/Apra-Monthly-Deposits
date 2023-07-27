@@ -31,16 +31,13 @@ download_banking_stats <- function() {
         path='Data/APRA Reporting Institute Names by Sector.xlsx', 
         sheet="Sheet1") 
     colnames <- readxl::read_excel(
-        path=here('Data', 'APRA Reporting Institute Names by Sector.xlsx'), 
+        path='Data/APRA Reporting Institute Names by Sector.xlsx', 
         sheet="ColNames")
     url <- "https://www.apra.gov.au/monthly-authorised-deposit-taking-institution-statistics"
     site <- read_html(url) 
     path <- site %>% html_elements(".document-link") %>% html_attr("href")  
-    download.file(url=path[2], here("Data", "temp.xlsx")) 
-    readxl::read_excel(path=here("Data", "temp.xlsx"), 
-                       sheet = "Table 1", 
-                       skip=1) %>% 
-        select(subset(keepcolumns, Keep==TRUE)$New) %>% 
+    download.file(url=path[2], "Data/temp.xlsx") 
+    readxl::read_excel(path="Data/temp.xlsx", sheet = "Table 1", skip=1) %>% 
         select(subset(colnames, Keep==TRUE)$New) %>% 
         rename("Institution"="Institution Name") %>% 
         mutate(`Total housing loans` = `Loans to households: Housing: Owner-occupied` + `Loans to households: Housing: Investment`) %>% 
@@ -120,11 +117,11 @@ ggplot_sector_trends <- function(data, measure=NULL) {
 
 update_bankstats <- function() {   
     data <- download_banking_stats() 
-    data.backseries <-  read_rds(here("Data", "bank_stats_backseries.rds")) %>% 
+    data.backseries <-  read_rds("Data/bank_stats_backseries.rds") %>% 
         filter(!(Period %in% data$Period)) 
     data <- bind_rows(data, data.backseries) 
-    write_rds(data, here("Data", "banking_stats.rds"))
+    write_rds(data, "Data/banking_stats.rds")
     write_json(data %>% mutate(Period=as.Date(Period)), 
-               here("docs", "banking_stats.json"), 
+               "ApraDoc/banking_stats.json", 
                auto_unbox = TRUE)
     return(data) } 

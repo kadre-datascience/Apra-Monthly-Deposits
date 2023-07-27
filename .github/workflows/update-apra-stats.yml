@@ -48,11 +48,11 @@ jobs:
     runs-on: ubuntu-latest
     container: klettsch/rquarto
     steps:
-      - name: publish1
+      - name: rerender
         run: |
           quarto render ApraDoc
 
       - name: move 
         run: |
           mkdir docs
-          cp -r ApraDoc/_site/* docs
+          cp ApraDoc/index.html docs
