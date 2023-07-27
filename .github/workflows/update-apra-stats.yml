@@ -17,7 +17,7 @@ jobs:
     # Run R script
     - name: Scrape
       run: |
-        Rscript Docs/bankstats.R   
+        Rscript ApraDoc/run.R   
 
     - name: Commit files
       run: |
@@ -36,9 +36,9 @@ jobs:
     steps:
       - name: publish1
         run: |
-          quarto render Docs
+          quarto render ApraDoc
 
       - name: move 
         run: |
           mkdir docs
-          cp -r Docs/_site/* docs
+          cp -r ApraDoc/_site/* docs

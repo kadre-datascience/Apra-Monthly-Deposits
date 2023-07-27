@@ -1,0 +1,119 @@
+---
+title: "APRA Monthly Banking Statistics"
+title-block-banner: '#028577'
+subtitle: Summary of Assets and Liabilities of Deposit Taking Financial Institutions in Australia
+date: today 
+date-format: DD MMMM YYYY
+author: Christian Klettner
+format: 
+    html:
+        css: www/kadre.css
+        embed-resources: true
+        include-after-body: www/footer.html
+execute: 
+    echo: false
+---
+
+Data source: [APRA Banking Statistics](https://www.apra.gov.au/monthly-authorised-deposit-taking-institution-statistics)
+
+```{ojs}
+import {Plot} from "@mkfreeman/plot-tooltip";
+import {addTooltips} from "@mkfreeman/plot-tooltip";
+```
+
+
+```{ojs}
+data = FileAttachment("banking_stats.json").json()
+measures = data.map(d => d.Measure).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}); 
+sectors = data.map(d => d.Sector).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}); 
+data = FileAttachment("banking_stats.csv").csv()
+measures = data.map(d => d.Measure).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).sort(); 
+sectors = data.map(d => d.Sector).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).sort(); 
+```
+
+
+## Sector Trends
+
+Select the balance sheet time to chart (you can select 1 only), select the sectors or group of authorised deposit taking institution types you are interested in (you can select many). 
+
+```{ojs}
+viewof measure = Inputs.select(measures, 
+  {value: "Total residents assets", label: "Financial Measures", width: 300, multiple: false})
+```
+```{ojs}
+viewof sector = Inputs.select(sectors, 
+  {value: "BIG 4", label: "Banking Sectors", width: 300, multiple: true})
+```
+
+&nbsp;  
+
+```{ojs}
+data_filter = data.filter(x => x.Measure==measure).filter(x => sector.includes(x.Sector)); 
+addTooltips(
+  Plot.plot({
+    height: 800,
+    color: { legend: true },
+    y: { grid: false, type: "log", label: "Value: $million"},
+    x: { type: "utc" }, 
+    marks: [
+      Plot.axisX({anchor: "top"}),
+      Plot.line(data_filter, 
+        { x: "Period", y: "ValueMillion", stroke: "Sector", 
+          z: "Institution", title: "Institution", opacity: 0.5 })
+      ]
+  }), 
+  { stroke: "black" }
+)
+```
+
+## Institution Balance Sheet
+
+```{ojs}
+institutions = data_filter.map(d => d.Institution).filter(function (e, i, x) {return x.indexOf(e, i+1) === -1;}).sort(); 
+```
+
+```{ojs}
+viewof institution = Inputs.select(institutions, 
+  {value: "Australia and New Zealand Banking Group Limited", label: "Institutions", width: 300, multiple: false})
+```
+
+```{ojs}
+lastdate = d3.max(data.map(d => d.Period));
+mthformat = d3.timeFormat("%Y-%m");
+viewof monthPicked = Inputs.text({
+  type: "month",
+  label: "Table Date",
+  value: mthformat(new Date(lastdate)),
+  min: "2002-06", 
+  max: mthformat(new Date(lastdate))
+})
+datePicked = monthPicked + "-01";
+```
+
+```{ojs}
+mthformatlong = d3.timeFormat("%B %Y");
+```
+
+### Loans
+
+```{ojs}
+md`**Loans** by ${institution} for the month ending ${mthformatlong(new Date(datePicked))}`
+```
+
+```{ojs}
+Inputs.table(
+  data.filter(d => d.Period===datePicked).filter(d => d.Institution===institution).filter(d => d.Measure.match("^Loans to")!=null), 
+  {   columns: [ "Measure", "ValueMillion"] });
+```
+
+### Deposits
+
+```{ojs}
+md`**Deposits** with the ${institution} for the month ending ${mthformatlong(new Date(datePicked))}`
+```
+
+```{ojs}
+Inputs.table(
+  data.filter(d => d.Period===datePicked).filter(d => d.Institution===institution).filter(d => d.Measure.match("^Deposits by")!=null), 
+  {   columns: [ "Measure", "ValueMillion"] });
+```
